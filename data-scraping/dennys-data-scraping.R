@@ -12,6 +12,7 @@ library(tidyr)
 library(stringr)
 library(ggmap)
 library(magrittr)
+source("R/get_latlon.R")
 
 
 # Is it legal to scrape from dennys.com? Yes! -----------------------------
@@ -96,19 +97,22 @@ master %<>%
 
 
 
-# Geocode locations (2500 queries per day for standard accounts) -----------------------------------------
+# Geocoding with MapQuest Open Geocoding API (5000 queries per day for standard accounts) -----------------------------------------
 
-register_google(key = Sys.getenv("Google_Maps_API_Key"), 
-                account_type = "standard")
+dennys <- readr::read_rds("data-scraping/dennys-locations.rds")
+lonlat <- future_map_dfr(dennys$location, get_latlon) # the get_latlon function needs my API Key
 
-lonlat <- geocode(location = master$location, output = "latlon", source = "google") # Some addresses were not geocoded
+# register_google(key = Sys.getenv("Google_Maps_API_Key"), 
+#                 account_type = "standard")
+# 
+# lonlat <- geocode(location = master$location, output = "latlon", source = "google") # Some addresses were not geocoded
 
-# Retry the geocoding of addresses that failed
+# Retry the geocoding of addresses that failed ~~~~
 
-na_index <- which(is.na(lonlat$lon) | is.na(lonlat$lat))
-lonlat_retry <- geocode(location = master$location[na_index], output = "latlon", source = "google") # Only 1 out of 15 addresses were geocoded
-lonlat_success <- which(lonlat_retry$lon & lonlat_retry$lat)
-lonlat[na_index[lonlat_success], ] <- lonlat_retry[lonlat_success, ] # Append lonlat tibble
+# na_index <- which(is.na(lonlat$lon) | is.na(lonlat$lat))
+# lonlat_retry <- geocode(location = master$location[na_index], output = "latlon", source = "google") # Only 1 out of 15 addresses were geocoded
+# lonlat_success <- which(lonlat_retry$lon & lonlat_retry$lat)
+# lonlat[na_index[lonlat_success], ] <- lonlat_retry[lonlat_success, ] # Append lonlat tibble
 
 # Add lonlat to master
 
