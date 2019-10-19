@@ -8,7 +8,7 @@
 
 get_latlon <- function(address){
   
-  httr::GET(url = "http://open.mapquestapi.com/geocoding/v1/address", query = list(
+  httr::GET(url = "http://www.mapquestapi.com/geocoding/v1/address", query = list(
     key = Sys.getenv("MapQuest_API_Key"),
     location = address
   )) -> raw
