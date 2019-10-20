@@ -72,8 +72,12 @@ saveRDS(master, here::here("data-scraping/laquinta-data-before-geocoding.rds"))
 possibly_get_latlon <- possibly(get_latlon, otherwise = NA)
 
 tic()
-lonlat <- future_map_dfr(master$location_url[1:5], possibly_get_latlon) # the get_latlon function needs my API Key
+lonlat <- future_map_dfr(master$location_url, possibly_get_latlon) # the get_latlon function needs my API Key
 toc()
 
 master %<>%
   bind_cols(lonlat)
+
+# Save results as an .rds file
+
+readr::write_rds(master, here::here("data-scraping/laquinta-locations.rds"))
