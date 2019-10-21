@@ -37,9 +37,15 @@ de <- de_raw %>%
 # Combine La Quinta and Denny's locations
 
 dat_all <- bind_rows(lq, de)
+<<<<<<< HEAD
 
 # Filter for common cities
 
+=======
+
+# Filter for common cities
+
+>>>>>>> 05f9484d446f9fb25883c817bdca616c7dc84ad5
 common_cities <- intersect(de$city_state, lq$city_state) # Vector of cities where both La Quinta and Denny's operate
 L
 
@@ -100,6 +106,7 @@ dat_split <- dat_common %>%
   select(franchise, lon, lat, city_state) %>%
   group_split(city_state) 
 
+
 # Compute distances in each common city
 
 dist_list <- map(dat_split, function(df){
@@ -115,6 +122,7 @@ distHaversine(p1 = c(-86.8, 33.4),
               p2 = c(-86.7, 33.4))
 
 distm(c(-86.8, 33.4), c(-86.7, 33.4))
+
 
 
 # Visualize distribution of distances
