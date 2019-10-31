@@ -37,17 +37,12 @@ de <- de_raw %>%
 # Combine La Quinta and Denny's locations
 
 dat_all <- bind_rows(lq, de)
-<<<<<<< HEAD
+
 
 # Filter for common cities
 
-=======
-
-# Filter for common cities
-
->>>>>>> 05f9484d446f9fb25883c817bdca616c7dc84ad5
 common_cities <- intersect(de$city_state, lq$city_state) # Vector of cities where both La Quinta and Denny's operate
-L
+
 
 dat_common <- dat_all %>% 
   tidyr::drop_na() %>%
@@ -109,22 +104,34 @@ dat_split <- dat_common %>%
 
 # Compute distances in each common city
 
+df <- dat_split[[1]]
+
 dist_list <- map(dat_split, function(df){
   
-  i_lst <- map(c("La Quinta", "Denny\'s"), ~ which(.x == df$franchise))
-  i <- expand.grid(i_lst[[1]], i_lst[[2]])
-  dist_matrix <- geosphere::distm(as.matrix(df[, c("lon", "lat")]))
-  map2_dbl(.x = i[,1], .y = i[,2], ~ dist_matrix[.x, .y])
+  # i_lst <- map(c("La Quinta", "Denny\'s"), ~ which(.x == df$franchise))
+  # i <- expand.grid(i_lst[[1]], i_lst[[2]])
+  # dist_matrix <- geosphere::distm(as.matrix(df[, c("lon", "lat")]))
+  # map2_dbl(.x = i[,1], .y = i[,2], ~ dist_matrix[.x, .y])
+  
+  df_split <- group_split(df, franchise)
+  de_locs <- as.data.frame(df_split[[1]]) # Denny's locations
+  n_de_locs <- nrow(de_locs) # Number of Denny's locations
+  lq_locs <- as.data.frame(df_split[[2]]) # Laquinta locations
+  
+  map_dfr(seq_len(n_de_locs), function(i){
+    spatialrisk::points_in_circle(data = lq_locs[, c("lon", "lat")], lon_center = de_locs[i, "lon"], lat_center = de_locs[i, "lat"], radius = 500)
+  })
   
 })
 
-distHaversine(p1 = c(-86.8, 33.4),
-              p2 = c(-86.7, 33.4))
+i <- dist_list %>%
+  map(nrow) %>%
+  flatten_dbl()
+i <- which(i != 0)
 
-distm(c(-86.8, 33.4), c(-86.7, 33.4))
-
+dist_df <- map_df(dist_list[i], ~.x)
 
 
 # Visualize distribution of distances
 
-qplot(x = flatten_dbl(dist_list), geom = "density")
+qplot(x = dist_df$distance_m, geom = "density")
